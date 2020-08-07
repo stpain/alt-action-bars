@@ -1,0 +1,1458 @@
+BlizzartUI_SavedVariables = BlizzartUI_SavedVariables or {
+	["Selected UI"] = UnitFactionGroup("player"),
+	["Display"] = {
+		["Main Menu Bar"] = true,
+		["Minimap"] = true,
+		["Player"] = true,
+		["Pet"] = true,
+		["Target"] = true,
+		["Target of Target"] = true,
+		["Focus"] = true,
+		["Target of Focus"] = true,
+		["Party Frames"] = true,
+		["Arena Enemy Frames"] = true,
+	}
+}
+
+local HorizontalTextures = {};
+local CircularTextures = {};
+local MainMenuBarTextures = {};
+
+BlizzartUI = CreateFrame("Frame");
+BlizzartUI:RegisterEvent("PLAYER_ENTERING_WORLD");
+BlizzartUI:SetScript("OnEvent", function(self) self:OnEvent(); end)
+
+function BlizzartUI:OnEvent()
+	self:SetupFrames();
+	self:SetTextures();
+	self:SetupAnimation();
+	self:SetupBindings();
+	self:SetupOptions();
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
+end
+
+function BlizzartUI:SetupFrames()
+	local tbl = BlizzartUI_SavedVariables["Display"];
+	
+	if ( tbl["Main Menu Bar"] == true ) then
+		self:SetupMainMenuBar();
+	end
+	if ( tbl["Minimap"] == true ) then
+		self:SetupMinimapFrame();
+	end
+	if ( tbl["Player"] == true ) then
+		self:SetupPlayerFrame();
+	end
+	if ( tbl["Pet"] == true ) then
+		self:SetupPetFrame();
+	end
+	if ( tbl["Target"] == true ) then
+		self:SetupTargetFrame();
+	end
+	if ( tbl["Target of Target"] == true ) then
+		self:SetupTargetFrameToT();
+	end
+	if ( tbl["Focus"] == true ) then
+		self:SetupFocusFrame();
+	end
+	if ( tbl["Target of Focus"] == true ) then
+		self:SetupFocusFrameToT();
+	end
+	if ( tbl["Party Frames"] == true ) then
+		self:SetupPartyFrames();
+	end
+	if ( tbl["Arena Enemy Frames"] == true ) then
+		self:SetupArenaFrames();
+	end
+end
+
+function BlizzartUI:GetHorizontalTexture()
+	local textureFile = "Interface\\UnitPowerBarAlt\\%s_Horizontal_Frame";
+	local text = BlizzartUI_SavedVariables["Selected UI"];
+	if ( text == "WoW" ) then
+		text = "WowUI";
+	elseif ( text == "Bronze" ) then
+		text = "MetalBronze";
+	elseif ( text == "Wood" ) then
+		text = "WoodBoards";
+	elseif ( text == "Metal" ) then
+		text = "MetalPlain";
+	elseif ( text == "Eternium" ) then
+		text = "MetalEternium";
+	end
+	return textureFile:format(text);
+end
+
+function BlizzartUI:GetCircularTexture()
+	local textureFile = "Interface\\UnitPowerBarAlt\\%s_Circular_Frame";
+	local text = BlizzartUI_SavedVariables["Selected UI"];
+	if ( text == "WoW" ) then
+		text = "WowUI";
+	elseif ( text == "Bronze" ) then
+		text = "MetalBronze";
+	elseif ( text == "Wood" ) then
+		text = "WoodBoards";
+	elseif ( text == "Metal" ) then
+		text = "MetalPlain";
+	elseif ( text == "Eternium" ) then
+		text = "MetalEternium";
+	end
+	return textureFile:format(text);
+end
+
+function BlizzartUI:GetMainMenuBarTexture()
+	local textureFile = "Interface\\PlayerActionBarAlt\\SpellBar-%s";
+	local text = BlizzartUI_SavedVariables["Selected UI"];
+	if ( text == "WoW" ) then
+		text = "Stone";
+	elseif ( text == "Bronze" ) then
+		text = "Stone";
+	elseif ( text == "Wood" ) then
+		text = "Nature";
+	elseif ( text == "Metal" ) then
+		text = "Wood";
+	elseif ( text == "Eternium" ) then
+		text = "Horde_center";
+	end	
+	return textureFile:format(text);
+end
+
+function BlizzartUI:SetupMainMenuBar()
+	MainMenuBar:SetSize(684, 104);
+	MainMenuBarMaxLevelBar:SetAlpha(0);
+	MainMenuBarMaxLevelBar:EnableMouse(false);
+	ActionBarUpButton:SetAlpha(0);
+	ActionBarUpButton:EnableMouse(false);
+	ActionBarDownButton:SetAlpha(0);
+	ActionBarDownButton:EnableMouse(false);
+	
+	self:SetupMainMenuBarTextures();
+	self:SetupMainActionButtons();
+	self:SetupBonusActionButtons();
+	self:SetupBottomActionButtons();
+	self:SetupBottomLeftActionButtons();
+	self:SetupBottomRightActionButtons();
+	self:SetupShapeshiftButtons();
+	self:SetupPetActionButtons();
+	self:SetupMicroButtons();
+	self:SetupBagButtons();
+	self:SetupMainMenuExpBar();
+	self:SetupReputationWatchBar();
+	self:ManageFrames();
+	self:MoveFrames();
+end
+
+function BlizzartUI:SetupMainMenuBarTextures()
+	MainMenuBarTexture0:SetAlpha(0);
+	MainMenuBarTexture1:SetAlpha(0);
+	MainMenuBarTexture2:SetAlpha(0);
+	MainMenuBarTexture3:SetAlpha(0);
+	MainMenuBarLeftEndCap:SetAlpha(0);
+	MainMenuBarRightEndCap:SetAlpha(0);
+	MainMenuBarPageNumber:SetAlpha(0);
+	
+	local texture = MainMenuBar:CreateTexture("MainMenuBarTexture");
+	texture:SetDrawLayer("BACKGROUND", 1);
+	texture:SetSize(1024, 128);
+	texture:SetPoint("BOTTOM");
+	tinsert(MainMenuBarTextures, texture);
+	
+	local texture = MainMenuBar:CreateTexture("MainMenuBarWoWMiddleTexture");
+	texture:SetDrawLayer("BACKGROUND", 1);
+	texture:SetSize(624, 128);
+	texture:SetPoint("BOTTOM");
+	texture:SetTexCoord(0.195, 0.805, 0, 1);
+	tinsert(MainMenuBarTextures, texture);
+	
+	local texture = MainMenuBar:CreateTexture("MainMenuBarWoWLeftTexture");
+	texture:SetTexture("Interface\\PlayerActionBarAlt\\PlayerActionBarAlt_Left");
+	texture:SetDrawLayer("BACKGROUND", 0);
+	texture:SetSize(60, 144);
+	texture:SetPoint("BOTTOMLEFT", -28, 0);
+	texture:SetTexCoord(0, 0.229, 0, 1);
+	
+	local texture = MainMenuBar:CreateTexture("MainMenuBarWoWRightTexture");
+	texture:SetTexture("Interface\\PlayerActionBarAlt\\PlayerActionBarAlt_Right");
+	texture:SetDrawLayer("BACKGROUND", 0);
+	texture:SetSize(60, 144);
+	texture:SetPoint("BOTTOMRIGHT", 28, 0);
+	texture:SetTexCoord(0.771, 1, 0, 1);
+	
+	local texture = MainMenuBar:CreateTexture("MainMenuBarEterniumMiddleTexture");
+	texture:SetDrawLayer("BACKGROUND", 1);
+	texture:SetSize(512, 128);
+	texture:SetPoint("BOTTOM", 1, 0);
+	tinsert(MainMenuBarTextures, texture);
+	
+	local texture = MainMenuBar:CreateTexture("MainMenuBarEterniumLeftTexture");
+	texture:SetTexture("Interface\\PlayerActionBarAlt\\SpellBar-Horde_left");
+	texture:SetDrawLayer("BACKGROUND", 1);
+	texture:SetSize(256, 128);
+	texture:SetPoint("BOTTOMLEFT", -169, 0);
+	
+	local texture = MainMenuBar:CreateTexture("MainMenuBarEterniumRightTexture");
+	texture:SetTexture("Interface\\PlayerActionBarAlt\\SpellBar-Horde_right");
+	texture:SetDrawLayer("BACKGROUND", 1);
+	texture:SetSize(256, 128);
+	texture:SetPoint("BOTTOMRIGHT", 171, 0);
+end
+
+function BlizzartUI:SetupMainActionButtons()
+	local numButtons = 12;
+	for i=1, numButtons do
+		local button = _G["ActionButton"..i];
+		button:SetSize(30, 30);
+		
+		local hotkey = _G[button:GetName().."HotKey"];
+		hotkey:SetSize(30, 14);
+		
+		local name = _G[button:GetName().."Name"];
+		name:SetSize(30, 14);
+	
+		local texture = MainMenuBarArtFrame:CreateTexture(button:GetName().."Texture");
+		texture:SetTexture("Interface\\Buttons\\UI-Quickslot");
+		texture:SetDrawLayer("BACKGROUND", -1);
+		texture:SetSize(60, 60);
+		texture:SetPoint("CENTER", button);
+		button:GetNormalTexture():SetAlpha(0);
+		
+		if (  i == 1 ) then
+			button:ClearAllPoints();
+			button:SetPoint("BOTTOMLEFT", MainMenuBarArtFrame, "BOTTOMLEFT", 66, 47);
+		else
+			button:ClearAllPoints();
+			button:SetPoint("LEFT", _G["ActionButton"..(i-1)], "RIGHT", 8, 0);
+		end
+		
+		if (  i > 10 ) then
+			button:SetAlpha(0);
+			button:EnableMouse(false);
+			texture:SetAlpha(0);
+		end
+	end
+end
+
+function BlizzartUI:SetupBonusActionButtons()
+	local condition = "[bonusbar:5] 11; [bar:2] 2; [bar:3] 3; [bar:4] 4; [bar:5] 5; [bar:6] 6; [bonusbar:1] 7; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10; [bar:1] 1;";
+	
+	local frame = CreateFrame("Frame", nil, nil, "SecureHandlerStateTemplate");
+	local numButtons = 10;
+	for i = 1, numButtons do
+		frame:SetFrameRef("ActionButton"..i, _G["ActionButton"..i]);
+	end
+
+	frame:Execute([[
+		buttons = table.new();
+		for i = 1, 10 do
+			table.insert(buttons, self:GetFrameRef("ActionButton"..i));
+		end
+	]])
+	
+	frame:SetAttribute("_onstate-page",[[
+		for i, button in ipairs(buttons) do
+			button:SetAttribute("actionpage", tonumber(newstate));
+		end
+	]])
+	
+	RegisterStateDriver(frame, "page", condition);
+end
+
+function BlizzartUI:SetupBottomActionButtons()
+	local numButtons = 10;
+	for i=1, numButtons do
+		local button = CreateFrame("CheckButton", "BottomActionButton"..i, MainMenuBarArtFrame, "ActionBarButtonTemplate");
+		button:SetSize(30, 30);
+		
+		local hotkey = _G[button:GetName().."HotKey"];
+		hotkey:SetSize(30, 14);
+		
+		local name = _G[button:GetName().."Name"];
+		name:SetSize(30, 14);
+		
+		local texture = MainMenuBarArtFrame:CreateTexture(button:GetName().."Texture");
+		texture:SetTexture("Interface\\Buttons\\UI-Quickslot");
+		texture:SetDrawLayer("BACKGROUND", -1);
+		texture:SetSize(60, 60);
+		texture:SetPoint("CENTER", button);
+		button:GetNormalTexture():SetAlpha(0);
+		
+		if (  i == 1 ) then
+			button:ClearAllPoints();
+			button:SetPoint("TOP", _G["ActionButton1"], "BOTTOM", 0, -8);
+		else
+			button:ClearAllPoints();
+			button:SetPoint("LEFT", _G["BottomActionButton"..(i-1)], "RIGHT", 8, 0);
+		end
+		
+		if ( i > 6 ) then
+			button:SetAttribute("action", i+50);
+		elseif ( i > 2 ) then
+			button:SetAttribute("action", i+66);
+		else
+			button:SetAttribute("action", i+10);
+		end	
+	end
+end
+	
+function BlizzartUI:SetupBottomLeftActionButtons()
+	local numButtons = 12;
+	for i=1, numButtons do
+		local button = _G["MultiBarBottomLeftButton"..i];
+		button:SetSize(30, 30);
+		
+		local hotkey = _G[button:GetName().."HotKey"];
+		hotkey:SetSize(30, 14);
+		
+		local name = _G[button:GetName().."Name"];
+		name:SetSize(30, 14);
+		
+		local texture = button:CreateTexture(button:GetName().."Texture");
+		texture:SetTexture("Interface\\Buttons\\UI-Quickslot2");
+		texture:SetDrawLayer("BACKGROUND", -1);
+		texture:SetSize(60, 60);
+		texture:SetPoint("CENTER", button);
+		button:GetNormalTexture():SetAlpha(0);
+		
+		if ( i > 1 ) then
+			button:ClearAllPoints();
+			button:SetPoint("LEFT", _G["MultiBarBottomLeftButton"..(i-1)], "RIGHT", 8, 0);
+		end
+		
+		if ( i > 8 ) then
+			button:SetAlpha(0);
+			button:EnableMouse(false);
+		end
+	end
+end
+		
+function BlizzartUI:SetupBottomRightActionButtons()
+	local numButtons = 12;
+	for i=1, numButtons do
+		local button = _G["MultiBarBottomRightButton"..i];
+		button:SetSize(30, 30);
+		
+		local hotkey = _G[button:GetName().."HotKey"];
+		hotkey:SetSize(30, 14);
+		
+		local name = _G[button:GetName().."Name"];
+		name:SetSize(30, 14);
+		
+		local texture = button:CreateTexture(button:GetName().."Texture");
+		texture:SetTexture("Interface\\Buttons\\UI-Quickslot2");
+		texture:SetDrawLayer("BACKGROUND", -1);
+		texture:SetSize(60, 60);
+		texture:SetPoint("CENTER", button);
+		button:GetNormalTexture():SetAlpha(0);
+		
+		if ( i > 1 ) then
+			button:ClearAllPoints();
+			button:SetPoint("LEFT", _G["MultiBarBottomRightButton"..(i-1)], "RIGHT", 8, 0);
+		end
+		
+		if ( i > 8 ) then
+			button:SetAlpha(0);
+			button:EnableMouse(false);
+		end
+	end
+end
+
+function BlizzartUI:SetupShapeshiftButtons()
+	ShapeshiftBarLeft:SetAlpha(0);
+	ShapeshiftBarRight:SetAlpha(0);
+	ShapeshiftBarMiddle:SetAlpha(0);
+	PossessBackground1:SetAlpha(0);
+	PossessBackground2:SetAlpha(0);
+
+	local numButtons = 10;
+	for i=1, numButtons do
+		local button = _G["ShapeshiftButton"..i];
+		
+		local texture = button:CreateTexture(button:GetName().."Texture");
+		texture:SetTexture("Interface\\Buttons\\UI-Quickslot2");
+		texture:SetDrawLayer("BACKGROUND", -1);
+		texture:SetSize(60, 60);
+		texture:SetPoint("CENTER", button);
+		button:GetNormalTexture():SetAlpha(0);
+		
+		if ( i > 1 ) then
+			button:ClearAllPoints();
+			button:SetPoint("LEFT", _G["ShapeshiftButton"..(i-1)], "RIGHT", 8, 0);
+		end	
+	end
+end
+
+function BlizzartUI:SetupPetActionButtons()
+	SlidingActionBarTexture0:SetAlpha(0);
+	SlidingActionBarTexture1:SetAlpha(0);
+
+	local numButtons = 10;
+	for i=1, numButtons do
+		local button = _G["PetActionButton"..i];
+		local texture = button:CreateTexture(button:GetName().."Texture");
+		texture:SetTexture("Interface\\Buttons\\UI-Quickslot2");
+		texture:SetDrawLayer("BACKGROUND", -1);
+		texture:SetSize(60, 60);
+		texture:SetPoint("CENTER", button);
+		button:GetNormalTexture():SetAlpha(0);
+		
+		if ( i > 1 ) then
+			button:ClearAllPoints();
+			button:SetPoint("LEFT", _G["PetActionButton"..(i-1)], "RIGHT", 8, 0);
+		end	
+	end
+end
+
+function BlizzartUI:SetupMicroButtons()
+	if ( not ( UnitHasVehicleUI("player") or GetBonusBarOverrideBarType() ) ) then
+		CharacterMicroButton:ClearAllPoints();
+		CharacterMicroButton:SetPoint("BOTTOMLEFT", MainMenuBarArtFrame, 453, 44);
+		GuildMicroButton:ClearAllPoints();
+		GuildMicroButton:SetPoint("TOPLEFT", CharacterMicroButton, "BOTTOMLEFT", 0, 22);
+	end
+	
+	hooksecurefunc(CharacterMicroButton, "SetPoint", function(self)
+		if ( UnitHasVehicleUI("player") or GetBonusBarOverrideBarType() ) then
+			return;
+		end
+		if ( not self.stopSetPoint ) then
+			self.stopSetPoint = true;
+			self:ClearAllPoints();
+			self:SetPoint("BOTTOMLEFT", MainMenuBarArtFrame, 453, 44);
+			self.stopSetPoint = false;
+		end
+	end)
+	
+	hooksecurefunc(GuildMicroButton, "SetPoint", function(self)
+		if ( UnitHasVehicleUI("player") or GetBonusBarOverrideBarType() ) then
+			return;
+		end
+		if ( not self.stopSetPoint ) then
+			self.stopSetPoint = true;
+			self:ClearAllPoints();
+			self:SetPoint("TOPLEFT", CharacterMicroButton, "BOTTOMLEFT", 0, 22);
+			self.stopSetPoint = false;
+		end
+	end)
+
+	self:SetupBackpackButton();
+end
+
+function BlizzartUI:SetupBackpackButton()
+	MainMenuBarBackpackButton:SetAlpha(0);
+	MainMenuBarBackpackButton:EnableMouse(false);
+	LoadMicroButtonTextures(HelpMicroButton, "Abilities");
+	HelpMicroButton:ClearAllPoints();
+	HelpMicroButton:SetPoint("TOPLEFT", QuestLogMicroButton, "TOPRIGHT", -3, 0);
+	
+	HelpMicroButton:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_LEFT");
+		GameTooltip:SetText(BACKPACK_TOOLTIP, 1.0, 1.0, 1.0);
+		local keyBinding = GetBindingKey("TOGGLEBACKPACK");
+		if ( keyBinding ) then
+			GameTooltip:AppendText(" "..NORMAL_FONT_COLOR_CODE.."("..keyBinding..")"..FONT_COLOR_CODE_CLOSE);
+		end
+		GameTooltip:AddLine(string.format(NUM_FREE_SLOTS, (MainMenuBarBackpackButton.freeSlots or 0)));
+		GameTooltip:Show();
+	end)
+	
+	HelpMicroButton:SetScript("OnClick", function() 
+		if ( CursorHasItem() ) then
+			PutItemInBackpack();
+		else
+			ToggleAllBags();
+		end
+	end)
+	
+	local numBags = 5;
+	for i=1, numBags do
+		local containerFrame = _G["ContainerFrame"..i];
+		
+		containerFrame:HookScript("OnShow", function()
+			if ( ContainerFrame1.bagsShown > 0 ) then
+				HelpMicroButton:SetButtonState("PUSHED", 1);
+			else
+				HelpMicroButton:SetButtonState("NORMAL");
+			end
+		end)
+		
+		containerFrame:HookScript("OnHide", function()
+			if ( ContainerFrame1.bagsShown > 0 ) then
+				HelpMicroButton:SetButtonState("PUSHED", 1);
+			else
+				HelpMicroButton:SetButtonState("NORMAL");
+			end
+		end)
+	end
+	
+	hooksecurefunc("UpdateMicroButtons", function()
+		if ( ContainerFrame1.bagsShown > 0 ) then
+			HelpMicroButton:SetButtonState("PUSHED", 1);
+		else
+			HelpMicroButton:SetButtonState("NORMAL");
+		end
+	end)
+	
+	hooksecurefunc(HelpMicroButton, "SetPoint", function(self)
+		if ( UnitHasVehicleUI("player") or GetBonusBarOverrideBarType() ) then
+			return;
+		end
+		if ( not self.stopSetPoint ) then
+			self.stopSetPoint = true;
+			self:ClearAllPoints();
+			self:SetPoint("TOPLEFT", QuestLogMicroButton, "TOPRIGHT", -3, 0);
+			self.stopSetPoint = false;
+		end
+	end)
+end
+
+function BlizzartUI:SetupBagButtons()
+	CharacterBag0Slot:SetAlpha(0);
+	CharacterBag0Slot:EnableMouse(false);
+	CharacterBag1Slot:SetAlpha(0);
+	CharacterBag1Slot:EnableMouse(false);
+	CharacterBag2Slot:SetAlpha(0);
+	CharacterBag2Slot:EnableMouse(false);
+	CharacterBag3Slot:SetAlpha(0);
+	CharacterBag3Slot:EnableMouse(false);
+
+	local numButtons = 4;	
+	for i=1, numButtons do
+		local bagButton = _G["CharacterBag"..(i-1).."Slot"];
+		local portraitButton = _G["ContainerFrame"..(i+1).."PortraitButton"];
+		
+		portraitButton:SetScript("OnClick", function()
+			if ( CursorHasItem() ) then
+				PutItemInBag(bagButton:GetID());
+			else
+				BagSlotButton_OnDrag(bagButton);
+			end
+		end)
+		
+		portraitButton:RegisterForDrag("LeftButton");
+		portraitButton:SetScript("OnDragStart", function()
+			if ( CursorHasItem() ) then
+				PutItemInBag(bagButton:GetID());
+			else
+				BagSlotButton_OnDrag(bagButton);
+			end
+		end)
+	end
+end
+
+function BlizzartUI:SetupMainMenuExpBar()
+	MainMenuXPBarTextureLeftCap:SetAlpha(0);
+	MainMenuXPBarTextureRightCap:SetAlpha(0);
+	MainMenuXPBarTextureMid:SetAlpha(0);
+	MainMenuExpBar:SetWidth(620);
+	
+	if ( ExhaustionTick ) then
+		ExhaustionTick_OnEvent(ExhaustionTick, "UPDATE_EXHAUSTION");
+	end
+
+	local xOffset = 26.5;
+	local numTextures = 19;
+	for i=1, numTextures do
+		local texture = _G["MainMenuXPBarDiv"..i] or MainMenuExpBar:CreateTexture("MainMenuXPBarDiv"..i);
+		texture:SetAlpha(0);
+		
+		local texture = MainMenuExpBar:CreateTexture("MainMenuExpBarDivider"..i);
+		texture:SetDrawLayer("OVERLAY", 2);
+		texture:SetTexture("Interface\\MainMenuBar\\UI-XP-Bar");
+		texture:SetSize(9, 9);
+		texture:SetPoint("LEFT", floor(xOffset), 1);
+		texture:SetTexCoord(0.01562500, 0.15625000, 0.01562500, 0.17187500);
+		xOffset = xOffset + 31;
+	end
+	
+	local texture = MainMenuExpBar:CreateTexture("MainMenuExpBarBarLeftCap");
+	texture:SetTexture("Interface\\MainMenuBar\\UI-XP-Bar");
+	texture:SetDrawLayer("OVERLAY", 1);
+	texture:SetSize(14, 14);
+	texture:SetPoint("LEFT", MainMenuExpBar, "LEFT", -3, 0);
+	texture:SetTexCoord(0.18750000, 0.43750000, 0.01562500, 0.26562500);
+	
+	local texture = MainMenuExpBar:CreateTexture("MainMenuExpBarBarRightCap");
+	texture:SetTexture("Interface\\MainMenuBar\\UI-XP-Bar");
+	texture:SetDrawLayer("OVERLAY", 1);
+	texture:SetSize(14, 14);
+	texture:SetPoint("RIGHT", MainMenuExpBar, "RIGHT", 3, 0);
+	texture:SetTexCoord(0.18750000, 0.43750000, 0.29687500, 0.54687500);
+	
+	local texture = MainMenuExpBar:CreateTexture("MainMenuExpBarMiddle");
+	texture:SetTexture("Interface\\MainMenuBar\\UI-XP-Mid");
+	texture:SetDrawLayer("OVERLAY", 1);
+	texture:SetSize(14, 14);
+	texture:SetPoint("LEFT", _G["MainMenuExpBarBarLeftCap"], "RIGHT", 0, 0);
+	texture:SetPoint("RIGHT", _G["MainMenuExpBarBarRightCap"], "LEFT", 0, 0);
+	texture:SetHorizTile(true);
+	
+	MainMenuExpBar:HookScript("OnShow", function()
+		self:MoveFrames();
+	end)
+	
+	MainMenuExpBar:HookScript("OnHide", function()
+		self:MoveFrames();
+	end)
+	
+	hooksecurefunc(MainMenuExpBar, "SetWidth", function(self)
+		local numTextures = 19;
+		if ( UnitHasVehicleUI("player") or GetBonusBarOverrideBarType() ) then
+			for i=1, numTextures do
+				local texture = _G["MainMenuXPBarDiv"..i];
+				texture:SetAlpha(1);		
+				local texture = _G["MainMenuExpBarDivider"..i];
+				texture:SetAlpha(0);
+			end
+			return;
+		end
+		
+		if ( not self.stopSetWidth ) then
+			self.stopSetWidth = true;	
+			for i=1, numTextures do
+				local texture = _G["MainMenuXPBarDiv"..i];
+				texture:SetAlpha(0);
+				local texture = _G["MainMenuExpBarDivider"..i];
+				texture:SetAlpha(1);
+			end		
+			self:SetWidth(620);
+			self.stopSetWidth = false;
+		end
+		
+		if ( ExhaustionTick ) then
+			ExhaustionTick_OnEvent(ExhaustionTick, "UPDATE_EXHAUSTION");
+		end
+	end)
+end
+
+function BlizzartUI:SetupReputationWatchBar()	
+	ReputationWatchBar:SetWidth(620);
+	ReputationWatchStatusBar:SetWidth(620);
+	ReputationWatchBarTexture0:SetAlpha(0);
+	ReputationWatchBarTexture1:SetAlpha(0);
+	ReputationWatchBarTexture2:SetAlpha(0);
+	ReputationWatchBarTexture3:SetAlpha(0);
+	ReputationXPBarTexture0:SetAlpha(0);
+	ReputationXPBarTexture1:SetAlpha(0);
+	ReputationXPBarTexture2:SetAlpha(0);
+	ReputationXPBarTexture3:SetAlpha(0);
+
+	local xOffset = 26.5;
+	local numTextures = 19;
+	for i=1, numTextures do
+		local texture = ReputationWatchStatusBar:CreateTexture("ReputationWatchStatusBarDivider"..i);
+		texture:SetDrawLayer("OVERLAY", 2);
+		texture:SetTexture("Interface\\MainMenuBar\\UI-XP-Bar");
+		texture:SetSize(9, 9);
+		texture:SetPoint("LEFT", floor(xOffset), 1);
+		texture:SetTexCoord(0.01562500, 0.15625000, 0.01562500, 0.17187500);
+		xOffset = xOffset + 31;
+	end
+	
+	local texture = ReputationWatchStatusBar:CreateTexture("ReputationWatchStatusBarLeftCap");
+	texture:SetTexture("Interface\\MainMenuBar\\UI-XP-Bar");
+	texture:SetDrawLayer("OVERLAY", 1);
+	texture:SetSize(14, 14);
+	texture:SetPoint("LEFT", ReputationWatchStatusBar, "LEFT", -3, 0);
+	texture:SetTexCoord(0.18750000, 0.43750000, 0.01562500, 0.26562500);
+	
+	local texture = ReputationWatchStatusBar:CreateTexture("ReputationWatchStatusBarRightCap");
+	texture:SetTexture("Interface\\MainMenuBar\\UI-XP-Bar");
+	texture:SetDrawLayer("OVERLAY", 1);
+	texture:SetSize(14, 14);
+	texture:SetPoint("RIGHT", ReputationWatchStatusBar, "RIGHT", 3, 0);
+	texture:SetTexCoord(0.18750000, 0.43750000, 0.29687500, 0.54687500);
+	
+	local texture = ReputationWatchStatusBar:CreateTexture("ReputationWatchStatusBarMiddle");
+	texture:SetTexture("Interface\\MainMenuBar\\UI-XP-Mid");
+	texture:SetDrawLayer("OVERLAY", 1);
+	texture:SetSize(14, 14);
+	texture:SetPoint("LEFT", _G["ReputationWatchStatusBarLeftCap"], "RIGHT", 0, 0);
+	texture:SetPoint("RIGHT", _G["ReputationWatchStatusBarRightCap"], "LEFT", 0, 0);
+	texture:SetHorizTile(true);
+	
+	ReputationWatchStatusBar:HookScript("OnShow", function()
+		self:MoveFrames();
+	end)
+	
+	ReputationWatchStatusBar:HookScript("OnHide", function()
+		self:MoveFrames();
+	end)
+	
+	hooksecurefunc(ReputationWatchStatusBar, "SetHeight", function(self)
+		if ( not self.stopSetHeight ) then
+			self.stopSetHeight = true;
+			self:SetHeight(11);
+			self.stopSetHeight = false;
+		end
+	end)
+end
+
+function BlizzartUI:ManageFrames()
+	for _, frame in ipairs({
+		MultiBarBottomLeft,
+		MultiBarBottomRight,
+		PetActionBarFrame,
+		ShapeshiftBarFrame,
+		PossessBarFrame,
+		MultiCastActionBarFrame,
+	})
+	do
+		local buttonFrame = CreateFrame("Frame", frame:GetName().."ButtonFrame");
+		buttonFrame:SetSize(frame:GetSize());	
+		for _, child in ipairs({frame:GetChildren()}) do
+			local point, relativeTo, relativePoint, xOffset, yOffset = child:GetPoint(child:GetNumPoints());	
+			if ( relativeTo == frame ) then
+				if ( frame == MultiCastActionBarFrame ) then
+					child:SetParent(buttonFrame);
+				end
+				if ( frame == ShapeshiftBarFrame ) then
+					hooksecurefunc(child, "SetPoint", function(self, ...)
+						local x, y = select(4, ...);
+						if ( x == 12 and y == 3 ) then
+							child:SetPoint(point, buttonFrame, relativePoint, xOffset, yOffset);
+						end
+					end)
+				end
+				child:SetPoint(point, buttonFrame, relativePoint, xOffset, yOffset);
+			end	
+		end
+		buttonFrame:SetParent(frame);
+		
+		if ( frame == MultiBarBottomLeft or frame == MultiBarBottomRight ) then
+			frame:HookScript("OnShow", function()
+				self:MoveFrames();
+			end)
+			
+			frame:HookScript("OnHide", function()
+				self:MoveFrames();
+			end)
+		end
+	end
+	
+	PetActionBarFrame:SetFrameStrata("HIGH");
+	BonusActionBarFrame:SetFrameStrata("LOW");
+	
+	if ( GetBonusBarOverrideBarType() ) then
+		BonusActionBarFrame:SetAlpha(1);
+	else
+		BonusActionBarFrame:SetAlpha(0);
+	end	
+	
+	local frame = CreateFrame("Frame");
+	frame:RegisterEvent("UPDATE_BONUS_ACTIONBAR");
+	frame:SetScript("OnEvent", function()
+		if ( GetBonusBarOverrideBarType() ) then
+			BonusActionBarFrame:SetAlpha(1);
+		else
+			BonusActionBarFrame:SetAlpha(0);
+		end	
+	end)
+	
+	hooksecurefunc(CastingBarFrame, "SetPoint", function(self, ...)
+		if ( not self.stopSetPoint ) then
+			self.stopSetPoint = true;
+			local offset = 50 - ( GetCurrentResolution() );
+			local point, relativeTo, relativePoint, xOffset, yOffset = ...;
+			self:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset+offset);
+			self.stopSetPoint = false;
+		end
+	end)
+end
+
+function BlizzartUI:MoveFrames()
+	if ( InCombatLockdown() or UnitHasVehicleUI("player") or GetBonusBarOverrideBarType() ) then
+		return;
+	end
+
+	local yOffset = 0;
+	if ( MainMenuExpBar:IsShown() or ReputationWatchBar:IsShown() ) then
+		ReputationWatchStatusBar:ClearAllPoints();
+		ReputationWatchStatusBar:SetPoint("TOP", MainMenuBar, "TOP", 0, 0);
+		yOffset = 10;
+	end
+	
+	if ( MainMenuExpBar:IsShown() and ReputationWatchBar:IsShown() ) then
+		ReputationWatchStatusBar:ClearAllPoints();
+		ReputationWatchStatusBar:SetPoint("BOTTOM", MainMenuBar, "TOP", 0, -1);
+		yOffset = 20;
+	end
+
+	MultiBarBottomLeftButtonFrame:ClearAllPoints();
+	MultiBarBottomLeftButtonFrame:SetPoint("BOTTOMLEFT", MainMenuBar, "TOPLEFT", 43, -6+yOffset);
+	MultiBarBottomRightButtonFrame:ClearAllPoints();
+	MultiBarBottomRightButtonFrame:SetPoint("LEFT", MultiBarBottomLeftButtonFrame, "RIGHT", -196, 0);
+	
+	if ( MultiBarBottomLeft:IsShown() ) then
+		ShapeshiftBarFrameButtonFrame:ClearAllPoints();
+		ShapeshiftBarFrameButtonFrame:SetPoint("BOTTOMLEFT", MainMenuBar, "TOPLEFT", 52, 29+yOffset);		
+		PossessBarFrameButtonFrame:ClearAllPoints();
+		PossessBarFrameButtonFrame:SetPoint("BOTTOMLEFT", MainMenuBar, "TOPLEFT", 52, 29+yOffset);
+		MultiCastActionBarFrameButtonFrame:ClearAllPoints();
+		MultiCastActionBarFrameButtonFrame:SetPoint("BOTTOMLEFT", MainMenuBar, "TOPLEFT", 59, 29+yOffset);
+	else
+		ShapeshiftBarFrameButtonFrame:ClearAllPoints();
+		ShapeshiftBarFrameButtonFrame:SetPoint("BOTTOMLEFT", MainMenuBar, "TOPLEFT", 33, -9+yOffset);
+		PossessBarFrameButtonFrame:ClearAllPoints();
+		PossessBarFrameButtonFrame:SetPoint("BOTTOMLEFT", MainMenuBar, "TOPLEFT", 33, -9+yOffset);
+		MultiCastActionBarFrameButtonFrame:ClearAllPoints();
+		MultiCastActionBarFrameButtonFrame:SetPoint("BOTTOMLEFT", MainMenuBar, "TOPLEFT", 40, -9+yOffset);
+	end
+	
+	if ( MultiBarBottomRight:IsShown() ) then
+		PetActionBarFrameButtonFrame:ClearAllPoints();
+		PetActionBarFrameButtonFrame:SetPoint("TOPLEFT", MainMenuBar, "BOTTOMLEFT", 216, 177+yOffset);
+	else
+		PetActionBarFrameButtonFrame:ClearAllPoints();
+		PetActionBarFrameButtonFrame:SetPoint("TOPLEFT", MainMenuBar, "BOTTOMLEFT", 235, 139+yOffset);
+	end
+end
+
+function BlizzartUI:SetupMinimapFrame()
+	BuffFrame:SetPoint("TOPRIGHT", -225, -13);
+	
+	MinimapCluster:ClearAllPoints();
+	MinimapCluster:SetPoint("TOPRIGHT", 0, -24);
+	
+	MinimapBorderTop:SetAlpha(0);
+	MiniMapInstanceDifficulty:SetAlpha(0);
+	MiniMapInstanceDifficulty:EnableMouse(false);
+	
+	MinimapZoneTextButton:SetSize(192, 32);
+	MinimapZoneTextButton:ClearAllPoints();
+	MinimapZoneTextButton:SetPoint("CENTER", 10, 105);
+	
+	MinimapZoneText:SetSize(170, 12);
+	MinimapZoneText:ClearAllPoints();
+	MinimapZoneText:SetPoint("CENTER");
+	
+	local frame = CreateFrame("Frame", nil, MinimapCluster);
+	frame:SetFrameLevel(1);
+	frame:SetSize(195, 30);
+	frame:SetPoint("CENTER", 10, 105);
+	
+	frame:SetBackdrop({
+	  edgeFile = "Interface\\Minimap\\TooltipBackdrop",
+	  edgeSize = 14,
+	})
+	
+	local texture = frame:CreateTexture("MinimapFrameBorderTexture");
+	texture:SetTexture("Interface\\Minimap\\UI-Minimap-Border");
+	texture:SetDrawLayer("BACKGROUND", -8);
+	texture:SetSize(256, 45);
+	texture:SetPoint("CENTER", MinimapCluster, -30, 70);
+	texture:SetTexCoord(0, 0.3, 0, 0.125, 1, 0.3, 1, 0.125);
+	
+	local texture = frame:CreateTexture("MinimapFrameBackgroundTexture");
+	texture:SetTexture(0, 0, 0, 0.5);
+	texture:SetDrawLayer("BACKGROUND", -7);
+	texture:SetSize(192, 32);
+	texture:SetPoint("CENTER", MinimapZoneTextButton);
+	
+	local texture = frame:CreateTexture("MinimapFrameHorizontalTexture");
+	texture:SetDrawLayer("BACKGROUND", -6);
+	texture:SetSize(256, 64);
+	texture:SetPoint("CENTER", MinimapZoneTextButton);
+	tinsert(HorizontalTextures, texture);
+	
+	MiniMapWorldMapButton:SetParent(Minimap);
+	MiniMapWorldMapButton:SetSize(40, 40);
+	MiniMapWorldMapButton:ClearAllPoints();
+	MiniMapWorldMapButton:SetPoint("TOPLEFT", -17, -3);
+	MiniMapWorldMapButton:SetHitRectInsets(0, 6, 5, 10);
+	MiniMapWorldMapButton:SetFrameLevel(GameTimeFrame:GetFrameLevel());
+	
+	local texture = MiniMapWorldMapButton:CreateTexture("MiniMapWorldMapButtonTexture");
+	texture:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder");
+	texture:SetDrawLayer("ARTWORK", 2);
+	texture:SetSize(64, 64);
+	texture:SetPoint("TOPLEFT");
+	
+	local texture = MiniMapWorldMapButton:CreateTexture("MiniMapWorldMapButtonNormalTexture");
+	texture:SetTexture("Interface\\TimeManager\\GlobeIcon");
+	texture:SetDrawLayer("ARTWORK", 1);
+	texture:SetSize(28, 28);
+	texture:SetPoint("CENTER", -1, 1);
+	MiniMapWorldMapButton:SetNormalTexture(texture);
+	
+	local texture = MiniMapWorldMapButton:CreateTexture("MiniMapWorldMapButtonPushedTexture");
+	texture:SetTexture("Interface\\TimeManager\\GlobeIcon");
+	texture:SetDrawLayer("ARTWORK", 1);
+	texture:SetVertexColor(0.8, 0.8, 0.8);
+	texture:SetSize(28, 28);
+	texture:SetPoint("CENTER", 0, 0);
+	MiniMapWorldMapButton:SetPushedTexture(texture);
+
+	local texture = MiniMapWorldMapButton:CreateTexture("MiniMapWorldMapButtonHighlightTexture");
+	texture:SetTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight");
+	texture:SetBlendMode("ADD");
+	texture:SetSize(42, 42);
+	texture:SetPoint("CENTER", -1, 1);
+	MiniMapWorldMapButton:SetHighlightTexture(texture);
+end
+
+function BlizzartUI:SetupPlayerFrame()
+	local frame = CreateFrame("Frame", nil, PlayerFrame);
+	frame:SetFrameLevel(1);
+
+	local texture = frame:CreateTexture("PlayerFrameHorizontalTexture");
+	texture:SetDrawLayer("BACKGROUND", -8);
+	texture:SetSize(192, 64);
+	texture:SetPoint("TOPLEFT", PlayerFrame, 71, -20);
+	texture:SetTexCoord(0.75, 0, 0, 1);
+	tinsert(HorizontalTextures, texture);
+
+	local texture = frame:CreateTexture("PlayerFrameCircularTexture");
+	texture:SetDrawLayer("BACKGROUND", -7);
+	texture:SetSize(139, 139);
+	texture:SetPoint("TOPLEFT", PlayerFrame, 5, 25);
+	tinsert(CircularTextures, texture);
+	
+	local texture = frame:CreateTexture("PlayerFrameNameBackground");
+	texture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-LevelBackground");
+	texture:SetDrawLayer("BACKGROUND", 1);
+	texture:SetSize(119, 19);
+	texture:SetPoint("TOPLEFT", PlayerFrame, 106, -22);
+	texture:SetVertexColor(UnitSelectionColor("player"));
+	
+	hooksecurefunc(_G["PlayerFrameVehicleTexture"], "Show", function()
+		frame:SetAlpha(0);
+	end)
+	
+	hooksecurefunc(_G["PlayerFrameVehicleTexture"], "Hide", function()
+		frame:SetAlpha(1);
+	end)
+	
+	local frame = CreateFrame("Frame");
+	frame:RegisterEvent("PLAYER_FLAGS_CHANGED");
+	frame:SetScript("OnEvent", function()
+		PlayerFrameNameBackground:SetVertexColor(UnitSelectionColor("player"));
+	end)
+end
+
+function BlizzartUI:SetupPetFrame()
+	local frame = CreateFrame("Frame", nil, PlayerFrame);
+	frame:SetFrameLevel(1);
+	
+	local texture = frame:CreateTexture("PetFrameHorizontalTexture");
+	texture:SetDrawLayer("BACKGROUND", -6);
+	texture:SetSize(128, 48);
+	texture:SetPoint("TOPLEFT", PetFrame, 15, -6);
+	texture:SetTexCoord(0.66, 0, 0, 1);
+	tinsert(HorizontalTextures, texture);
+
+	local texture = frame:CreateTexture("PetFrameCircularTexture");
+	texture:SetDrawLayer("BACKGROUND", -5);
+	texture:SetSize(90, 90);
+	texture:SetPoint("TOPLEFT", PetFrame, -21, 20);
+	tinsert(CircularTextures, texture);
+	
+	if ( PetFrame:IsShown() ) then
+		PetFrameHorizontalTexture:Show();
+		PetFrameCircularTexture:Show();
+	else
+		PetFrameHorizontalTexture:Hide();
+		PetFrameCircularTexture:Hide();
+	end
+	
+	PetFrame:HookScript("OnShow", function()
+		PetFrameHorizontalTexture:Show();
+		PetFrameCircularTexture:Show();
+	end)
+	
+	PetFrame:HookScript("OnHide", function()
+		PetFrameHorizontalTexture:Hide();
+		PetFrameCircularTexture:Hide();
+	end)
+	
+	hooksecurefunc(PetFrame, "SetAlpha", function(self, alpha)
+		PetFrameHorizontalTexture:SetAlpha(alpha);
+		PetFrameCircularTexture:SetAlpha(alpha);
+	end)
+end
+
+function BlizzartUI:SetupTargetFrame()
+	TargetFrame:SetPoint("TOPLEFT", 282, -4);
+	
+	local frame = CreateFrame("Frame", nil, TargetFrame);
+	frame:SetFrameLevel(1);
+	
+	local texture = frame:CreateTexture("TargetFrameHorizontalTexture");
+	texture:SetDrawLayer("BACKGROUND", -8);
+	texture:SetSize(192, 64);
+	texture:SetPoint("TOPRIGHT", TargetFrame, -71, -20);
+	texture:SetTexCoord(0, 0.75, 0, 1);
+	tinsert(HorizontalTextures, texture);
+
+	local texture = frame:CreateTexture("TargetFrameCircularTexture");
+	texture:SetDrawLayer("BACKGROUND", -7);
+	texture:SetSize(139, 139);
+	texture:SetPoint("TOPRIGHT", TargetFrame, -5, 25);
+	tinsert(CircularTextures, texture);
+end
+
+function BlizzartUI:SetupTargetFrameToT()
+	local frame = CreateFrame("Frame", nil, TargetFrame);
+	frame:SetFrameLevel(1);
+	
+	local texture = frame:CreateTexture("TargetFrameToTHorizontalTexture");
+	texture:SetDrawLayer("BACKGROUND", -6);
+	texture:SetSize(96, 48);
+	texture:SetPoint("TOPLEFT", TargetFrameToT, 23, 2);
+	texture:SetTexCoord(0.5, 0, 0, 1);
+	texture:Hide();
+	tinsert(HorizontalTextures, texture);
+
+	local texture = frame:CreateTexture("TargetFrameToTCircularTexture");
+	texture:SetDrawLayer("BACKGROUND", -5);
+	texture:SetSize(90, 90);
+	texture:SetPoint("TOPLEFT", TargetFrameToT, -23, 22);
+	texture:Hide();
+	tinsert(CircularTextures, texture);
+	
+	TargetFrameToT:HookScript("OnShow", function()
+		TargetFrameToTHorizontalTexture:Show();
+		TargetFrameToTCircularTexture:Show();
+	end)
+	
+	TargetFrameToT:HookScript("OnHide", function()
+		TargetFrameToTHorizontalTexture:Hide();
+		TargetFrameToTCircularTexture:Hide();
+	end)
+	
+	hooksecurefunc(TargetFrameToT, "SetAlpha", function(self, alpha)
+		PetFrameHorizontalTexture:SetAlpha(alpha);
+		PetFrameCircularTexture:SetAlpha(alpha);
+	end)
+end
+
+function BlizzartUI:SetupFocusFrame()	
+	local frame = CreateFrame("Frame", nil, FocusFrame);
+	frame:SetFrameLevel(1);
+	
+	local texture = frame:CreateTexture("FocusFrameHorizontalTexture");
+	texture:SetDrawLayer("BACKGROUND", -8);
+	texture:SetSize(192, 64);
+	texture:SetPoint("TOPRIGHT", FocusFrame, -71, -20);
+	texture:SetTexCoord(0, 0.75, 0, 1);
+	tinsert(HorizontalTextures, texture);
+
+	local texture = frame:CreateTexture("FocusFrameCircularTexture");
+	texture:SetDrawLayer("BACKGROUND", -7);
+	texture:SetSize(139, 139);
+	texture:SetPoint("TOPRIGHT", FocusFrame, -5, 25);
+	tinsert(CircularTextures, texture);
+end
+
+function BlizzartUI:SetupFocusFrameToT()
+	local frame = CreateFrame("Frame", nil, FocusFrame);
+	frame:SetFrameLevel(1);
+	
+	local texture = frame:CreateTexture("FocusFrameToTHorizontalTexture");
+	texture:SetDrawLayer("BACKGROUND", -6);
+	texture:SetSize(96, 48);
+	texture:SetPoint("TOPLEFT", FocusFrameToT, 23, 2);
+	texture:SetTexCoord(0.5, 0, 0, 1);
+	texture:Hide();
+	tinsert(HorizontalTextures, texture);
+
+	local texture = frame:CreateTexture("FocusFrameToTCircularTexture");
+	texture:SetDrawLayer("BACKGROUND", -5);
+	texture:SetSize(90, 90);
+	texture:SetPoint("TOPLEFT", FocusFrameToT, -23, 22);
+	texture:Hide();
+	tinsert(CircularTextures, texture);
+	
+	FocusFrameToT:HookScript("OnShow", function()
+		FocusFrameToTHorizontalTexture:Show();
+		FocusFrameToTCircularTexture:Show();
+	end)
+	
+	FocusFrameToT:HookScript("OnHide", function()
+		FocusFrameToTHorizontalTexture:Hide();
+		FocusFrameToTCircularTexture:Hide();
+	end)
+	
+	hooksecurefunc(FocusFrameToT, "SetAlpha", function(self, alpha)
+		PetFrameHorizontalTexture:SetAlpha(alpha);
+		PetFrameCircularTexture:SetAlpha(alpha);
+	end)
+end
+
+function BlizzartUI:SetupPartyFrames()
+	local numFrames = 4;
+	for i=1, numFrames do
+		local frame = CreateFrame("Frame", nil, _G["PartyMemberFrame"..i]);
+		frame:SetFrameLevel(1);
+		
+		local texture = frame:CreateTexture("PartyMemberFrame"..i.."HorizontalTexture");
+		texture:SetDrawLayer("BACKGROUND", -8);
+		texture:SetSize(128, 48);
+		texture:SetPoint("TOPLEFT", _G["PartyMemberFrame"..i], 17, 4);
+		texture:SetTexCoord(0.66, 0, 0, 1);
+		tinsert(HorizontalTextures, texture);
+
+		local texture = frame:CreateTexture("PartyMemberFrame"..i.."CircularTexture");
+		texture:SetDrawLayer("BACKGROUND", -7);
+		texture:SetSize(90, 90);
+		texture:SetPoint("TOPLEFT", _G["PartyMemberFrame"..i], -20, 19);
+		tinsert(CircularTextures, texture);
+		
+		local frame = _G["PartyMemberFrame"..i];
+		
+		if ( i > 1 ) then
+			frame:SetPoint("TOPLEFT", _G["PartyMemberFrame"..(i-1).."PetFrame"], "BOTTOMLEFT", -23, -20);
+		end
+		
+		hooksecurefunc(_G[frame:GetName().."VehicleTexture"], "Show", function()
+			frame:SetAlpha(0);
+		end)
+		
+		hooksecurefunc(_G[frame:GetName().."VehicleTexture"], "Hide", function()
+			frame:SetAlpha(1);
+		end)
+	end
+end
+
+function BlizzartUI:SetupArenaFrames()
+	UIParentLoadAddOn("Blizzard_ArenaUI");
+	local numFrames = 5;
+	for i=1, numFrames do
+		local frame = CreateFrame("Frame", nil, _G["ArenaEnemyFrame"..i]);
+		frame:SetFrameLevel(1);
+		
+		local texture = frame:CreateTexture("ArenaEnemyFrame"..i.."HorizontalTexture");
+		texture:SetDrawLayer("BACKGROUND", -8);
+		texture:SetSize(128, 48);
+		texture:SetPoint("TOPRIGHT", _G["ArenaEnemyFrame"..i], -2, 6);
+		texture:SetTexCoord(0, 0.66, 0, 1);
+		tinsert(HorizontalTextures, texture);
+
+		local texture = frame:CreateTexture("ArenaEnemyFrame"..i.."CircularTexture");
+		texture:SetDrawLayer("BACKGROUND", -7);
+		texture:SetSize(90, 90);
+		texture:SetPoint("TOPRIGHT", _G["ArenaEnemyFrame"..i], 35, 21);
+		tinsert(CircularTextures, texture);
+		
+		local frame = _G["ArenaEnemyFrame"..i];
+		
+		local texture = _G[frame:GetName().."ClassPortrait"];
+		texture:SetSize(37, 37);
+		texture:ClearAllPoints();
+		texture:SetPoint("TOPRIGHT", 7, -6);
+		
+		local texture = _G[frame:GetName().."Texture"];
+		texture:SetTexture("Interface\\TargetingFrame\\UI-PartyFrame");
+		texture:SetSize(128, 64);
+		texture:ClearAllPoints();
+		texture:SetPoint("TOPRIGHT", 15, 0);
+		texture:SetTexCoord(1, 0, 0, 1);
+		
+		local texture = _G[frame:GetName().."Flash"];
+		texture:SetTexture("Interface\\TargetingFrame\\UI-PartyFrame-Flash");
+		texture:SetSize(128, 64);
+		texture:ClearAllPoints();
+		texture:SetPoint("TOPRIGHT", 18, 4);
+		texture:SetTexCoord(1, 0, 0, 1);
+		
+		if ( i == 1 ) then
+			frame:SetPoint("TOPRIGHT", ArenaEnemyFrames, -25, 0);
+		else
+			frame:SetPoint("TOP", _G["ArenaEnemyFrame"..(i-1)], "BOTTOM", 0, -40);
+		end
+	end
+end
+
+function BlizzartUI:SetTextures()
+	if ( MainMenuBarTexture ) then
+		MainMenuBarTexture:Show();
+	end
+	
+	if ( MainMenuBarWoWMiddleTexture ) then
+		if ( BlizzartUI_SavedVariables["Selected UI"] == "WoW" ) then
+			MainMenuBarTexture:Hide();
+			MainMenuBarWoWMiddleTexture:Show();
+			MainMenuBarWoWLeftTexture:Show();
+			MainMenuBarWoWRightTexture:Show();
+		else
+			MainMenuBarWoWMiddleTexture:Hide();
+			MainMenuBarWoWLeftTexture:Hide();
+			MainMenuBarWoWRightTexture:Hide();
+		end
+	end
+		
+	if ( MainMenuBarEterniumMiddleTexture ) then
+		if ( BlizzartUI_SavedVariables["Selected UI"] == "Eternium" ) then
+			MainMenuBarTexture:Hide();
+			MainMenuBarEterniumMiddleTexture:Show();
+			MainMenuBarEterniumLeftTexture:Show();
+			MainMenuBarEterniumRightTexture:Show();
+		else
+			MainMenuBarEterniumMiddleTexture:Hide();
+			MainMenuBarEterniumLeftTexture:Hide();
+			MainMenuBarEterniumRightTexture:Hide();
+		end
+	end
+		
+	local textureFile = self:GetMainMenuBarTexture();
+	for _, texture in ipairs(MainMenuBarTextures) do
+		texture:SetTexture(textureFile);
+	end
+	
+	local textureFile = self:GetHorizontalTexture();
+	for _, texture in ipairs(HorizontalTextures) do
+		texture:SetTexture(textureFile);
+	end
+	
+	local textureFile = self:GetCircularTexture();
+	for _, texture in ipairs(CircularTextures) do
+		texture:SetTexture(textureFile);
+	end
+end
+
+function BlizzartUI:SetupAnimation()
+	self.FadeAnimationGroup = self:CreateAnimationGroup();
+	self.FadeAnimation = self.FadeAnimationGroup:CreateAnimation();
+	self.FadeAnimation:SetDuration(1);
+
+	self.FadeAnimation:SetScript("OnPlay", function()
+		UIFrameFadeOut(UIParent, 1, 1, 0);
+	end)
+
+	self.FadeAnimation:SetScript("OnFinished", function()
+		UIFrameFadeIn(UIParent, 1, 0, 1);
+		self:SetTextures();
+		PlaySoundFile("Sound\\interface\\HumanExploration.ogg");
+	end)
+end
+
+function BlizzartUI:SetupBindings()
+	BINDING_HEADER_BLIZZARTUI = "Blizzart UI";
+	local numBindings = 10;
+	for i=1, numBindings do
+		local text = "BINDING_NAME_CLICK BottomActionButton"..i..":LeftButton";
+		local name = "Bottom Action Button "..i;
+		_G[text] = name;
+	end
+end
+
+function BlizzartUI:GetUIButtonTexture(text)
+	local textureFile = "Interface\\UnitPowerBarAlt\\%s_Vertical_Frame";
+	if ( text == "WoW" ) then
+		text = "WowUI";
+	elseif ( text == "Bronze" ) then
+		text = "MetalBronze";
+	elseif ( text == "Wood" ) then
+		text = "WoodBoards";
+	elseif ( text == "Metal" ) then
+		text = "MetalPlain";
+	elseif ( text == "Eternium" ) then
+		text = "MetalEternium";
+	end
+	return textureFile:format(text);
+end
+
+function BlizzartUI:UpdateUIButtons()
+	local numButtons = 8;
+	for i=1, numButtons do
+		local button = _G["BlizzartUIButton"..i];
+		local checked = button:GetText() == self.selectedUI;	
+		if ( checked ) then
+			button:SetNormalFontObject("GameFontHighlight");
+		else
+			button:SetNormalFontObject("GameFontNormal");
+		end
+		button:SetChecked(checked);
+	end
+end
+
+function BlizzartUI:SetupOptions()
+	local frame = CreateFrame("Frame", "BlizzartUIOptionsFrame", UIParent);
+	frame.name = "Blizzart UI";
+	
+	local text = frame:CreateFontString("BlizzartUIOptionsFrameText");
+	text:SetFontObject("GameFontNormalLarge");
+	text:SetText("Blizzart UI Themes");
+	text:SetPoint("TOP", 0, -48);
+	
+	local texture = frame:CreateTexture("BlizzartUIOptionsFrameTextTexture");
+	texture:SetTexture("Interface\\UnitPowerBarAlt\\MetalGold_Horizontal_Frame");
+	texture:SetDrawLayer("ARTWORK", 1);
+	texture:SetPoint("CENTER", BlizzartUIOptionsFrameText);
+	
+	frame.refresh = function()
+		self.selectedUI = BlizzartUI_SavedVariables["Selected UI"];
+		self:UpdateUIButtons();
+	end
+	
+	frame.okay = function()
+		if ( not ( self.selectedUI == BlizzartUI_SavedVariables["Selected UI"] ) ) then
+			BlizzartUI_SavedVariables["Selected UI"] = self.selectedUI;
+			self.FadeAnimationGroup:Play();
+		end
+	end
+	
+	local tbl = {
+		"Alliance",
+		"Horde",
+		"WoW",
+		"Bronze",
+		"Metal",
+		"Eternium",
+		"Wood",
+		"Mechanical",
+	}
+	
+	local anchor;
+	for k, v in pairs(tbl) do
+		local button = CreateFrame("CheckButton","BlizzartUIButton"..k, frame);
+		button:SetCheckedTexture("Interface\\QuestFrame\\UI-QuestLogTitleHighlight", "ADD");
+		button:GetCheckedTexture():SetVertexColor(0.196, 0.388, 0.8);
+		button:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestLogTitleHighlight", "ADD");
+		button:GetHighlightTexture():SetVertexColor(0.196, 0.388, 0.8);
+		button:SetNormalFontObject("GameFontNormal");
+		button:SetHighlightFontObject("GameFontHighlight");
+		button:SetText(v);
+		button:SetSize(92, 32);
+		
+		local texture = button:CreateTexture(button:GetName().."Texture");
+		texture:SetTexture(self:GetUIButtonTexture(v));
+		texture:SetDrawLayer("ARTWORK", 1);
+		texture:SetSize(128, 64);
+		texture:SetPoint("CENTER");
+		texture:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1);
+		
+		if ( k == 1 ) then
+			button:SetPoint("TOPLEFT", frame, "TOPLEFT", 32, -128);
+			anchor = button;
+		elseif ( mod(k, 4) == 1 ) then
+			button:SetPoint("TOPLEFT", frame, "TOPLEFT", 32, -224);
+			anchor = button;
+		else
+			button:SetPoint("LEFT", anchor, "RIGHT", 64, 0);
+			anchor = button;
+		end
+		
+		button:SetScript("OnClick", function()
+			self.selectedUI = v;
+			self:UpdateUIButtons();
+			PlaySound("igMainMenuOptionCheckBoxOn");
+		end)
+	end
+	
+	InterfaceOptions_AddCategory(frame);
+	
+	local frame = CreateFrame("Frame");
+	frame.name = "Display";
+	frame.parent = "Blizzart UI";
+
+	frame.title = frame:CreateFontString();
+	frame.title:SetFontObject("GameFontNormalLarge");
+	frame.title:SetText("Display");
+	frame.title:SetJustifyH("LEFT");
+	frame.title:SetJustifyV("TOP");
+	frame.title:SetPoint("TOPLEFT", 16, -16);
+	
+	frame.text = frame:CreateFontString();
+	frame.text:SetFontObject("GameFontHighlightSmall");
+	frame.text:SetText("These options allow you to control wich frames are modified.");
+	frame.text:SetNonSpaceWrap(true);
+	frame.text:SetJustifyH("LEFT");
+	frame.text:SetJustifyV("TOP");
+	frame.text:SetSize(32, 0);
+	frame.text:SetPoint("TOPLEFT", frame.title, "BOTTOMLEFT", 0, -8);
+	frame.text:SetPoint("RIGHT", -32, 0);
+	
+	frame.refresh = function()
+		local tbl = BlizzartUI_SavedVariables["Display"];
+		local numButtons = 10;
+		for i=1, numButtons do
+			local button = _G["BlizzartUIDisplayButton"..i];
+			local text = _G[button:GetName().."Text"]:GetText();
+			button:SetChecked(tbl[text]);
+		end
+	end
+	
+	frame.okay = function()
+		local tbl = BlizzartUI_SavedVariables["Display"];
+		local numButtons = 10;
+		for i=1, numButtons do
+			local button = _G["BlizzartUIDisplayButton"..i];
+			local text = _G[button:GetName().."Text"]:GetText();
+			local checked = button:GetChecked() == 1;
+			if ( not tbl[text] == checked ) then
+				StaticPopup_Show("BLIZZARTUI_SAVESETTINGS");
+			end
+		end
+	end
+
+	local tbl = {
+		"Main Menu Bar",
+		"Minimap",
+		"Player",
+		"Pet",
+		"Target",
+		"Target of Target",
+		"Focus",
+		"Target of Focus",
+		"Party Frames",
+		"Arena Enemy Frames",
+	}
+
+	local anchor;
+	for k, v in pairs(tbl) do
+		local button = CreateFrame("CheckButton", "BlizzartUIDisplayButton"..k, frame, "InterfaceOptionsCheckButtonTemplate");
+		
+		if ( k == 1 ) then
+			button:SetPoint("TOPLEFT", frame.text, -2, -30);
+			anchor = button;
+		elseif ( mod(k, 2) == 1 ) then
+			button:SetPoint("TOP", anchor, "BOTTOM", 0, -10);
+			anchor = button;
+		else
+			button:SetPoint("LEFT", anchor, "RIGHT", 160, 0);
+		end
+		
+		local text = _G[button:GetName().."Text"];
+		text:SetText(v);
+	end
+	
+	InterfaceOptions_AddCategory(frame);
+end
+
+StaticPopupDialogs["BLIZZARTUI_SAVESETTINGS"] = {
+	text = "Blizzart UI\n\nDo you want to reload the UI and save your settings?",
+	button1 = OKAY,
+	button2 = CANCEL,
+	OnAccept = function(self)
+		local tbl = BlizzartUI_SavedVariables["Display"];
+		local numButtons = 10;
+		for i=1, numButtons do
+			local button = _G["BlizzartUIDisplayButton"..i];
+			local text = _G[button:GetName().."Text"]:GetText();
+			tbl[text] = button:GetChecked() == 1;
+		end
+		ReloadUI();
+	end,
+	OnCancel = function(self)
+		--
+	end,
+	timeout = 0,
+	whileDead = 1,
+	showAlert = 1,
+}
+
+SLASH_BLIZZARTUI1 = "/blizzart";
+SlashCmdList["BLIZZARTUI"] = function(text)
+	local text = text:lower();
+	local numButtons = 8;
+	for i=1, numButtons do
+		local button = _G["BlizzartUIButton"..i];
+		local buttonText = button:GetText():lower();
+		if ( buttonText == text ) then
+			BlizzartUI_SavedVariables["Selected UI"] = button:GetText();
+			BlizzartUI.FadeAnimationGroup:Play();
+			return;
+		end
+	end
+	InterfaceOptionsFrame_OpenToCategory(BlizzartUIOptionsFrame);
+end
