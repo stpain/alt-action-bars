@@ -2,76 +2,186 @@
 
 local addonName, AAB = ...
 
-function AAB.UpdateTextures(texture)
+AAB_SELECTED_THEME = nil
 
-    local barHeight = MainMenuBar:GetHeight()
-    local barWidth = MainMenuBar:GetWidth()
-    local yOffset = StatusTrackingBarManager:GetHeight()
+local point, relativeTo, relativePoint, xOfs, yOfs = MainMenuBarArtFrame.LeftEndCap:GetPoint()
+local width, height = MainMenuBarArtFrame.LeftEndCap:GetWidth(), MainMenuBarArtFrame.LeftEndCap:GetHeight()
+AAB_MAIN_MENU_BAR_LEFT_TEXTURE = { Width = width, Height = height, Point = point, RelativeTo = relativeTo, RelativePoint = relativePoint, Xoffset = xOfs, Yoffset = yOfs }
 
-    -- set the left end texture
-    MainMenuBarArtFrame.LeftEndCap:SetTexture(texture.ID)
-    MainMenuBarArtFrame.LeftEndCap:SetTexCoord(0, 0.32, 0.78, 1)
-
-    -- set the right end texture, here we flip the image using the 8 point coord system
-    MainMenuBarArtFrame.RightEndCap:SetTexture(texture.ID)
-    MainMenuBarArtFrame.RightEndCap:SetTexCoord(0.32, 0.78, 0.32, 1, 0, 0.78, 0, 1)
-
-    -- set the background when no extra bars are displayed
-    MainMenuBarArtFrameBackground.BackgroundSmall:SetTexture(texture.ID)
-    MainMenuBarArtFrameBackground.BackgroundSmall:SetTexCoord(0, 1, 0.17, 0.35)
-    MainMenuBarArtFrameBackground.BackgroundSmall:SetDrawLayer("BACKGROUND", -1)
-
-    -- set the background when extra bars are displayed
-    MainMenuBarArtFrameBackground.BackgroundLarge:SetTexture(texture.ID)
-    MainMenuBarArtFrameBackground.BackgroundLarge:SetTexCoord(0, 1, 0.17, 0.35)
-    MainMenuBarArtFrameBackground.BackgroundLarge:SetDrawLayer("BACKGROUND", -1)
-  
-    if MultiBarBottomLeft:IsVisible() then
-        MainMenuBarArtFrameBackground.BackgroundSmall:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, barHeight)
-        MainMenuBarArtFrameBackground.BackgroundLarge:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, barHeight)
-
-        --MainMenuBarArtFrame.LeftEndCap:ClearAllPoints()
-        MainMenuBarArtFrame.LeftEndCap:SetPoint('TOPLEFT', MainMenuBarArtFrameBackground, 'TOPLEFT', -200, barHeight + yOffset + yOffset + yOffset)
-        MainMenuBarArtFrame.LeftEndCap:SetPoint('TOPRIGHT', MainMenuBarArtFrameBackground, 'TOPLEFT', barHeight, barHeight + yOffset + yOffset + yOffset)
+local point, relativeTo, relativePoint, xOfs, yOfs = MainMenuBarArtFrame.RightEndCap:GetPoint()
+local width, height = MainMenuBarArtFrame.RightEndCap:GetWidth(), MainMenuBarArtFrame.RightEndCap:GetHeight()
+AAB_MAIN_MENU_BAR_RIGHT_TEXTURE = { Width = width, Height = height, Point = point, RelativeTo = relativeTo, RelativePoint = relativePoint, Xoffset = xOfs, Yoffset = yOfs }
 
 
-        MainMenuBarArtFrame.RightEndCap:SetPoint('TOPRIGHT', MainMenuBarArtFrameBackground, 'TOPRIGHT', 200, barHeight + yOffset + yOffset + yOffset)
-        MainMenuBarArtFrame.RightEndCap:SetPoint('TOPLEFT', MainMenuBarArtFrameBackground, 'TOPRIGHT', barHeight * -1, barHeight + yOffset + yOffset + yOffset)
 
-        
-    end
+AAB_MAIN_MENU_BAR_HEIGHT = MainMenuBar:GetHeight()
+AAB_MAIN_MENU_BAR_WIDTH = MainMenuBar:GetWidth()
+AAB_STATUS_BAR_OFFSET = StatusTrackingBarManager:GetHeight()
 
-    if not AAB.MainMenuBarArtFrameBackground_TopBorder then
-        AAB.MainMenuBarArtFrameBackground_TopBorder = MainMenuBarArtFrame:CreateTexture('$parent_ABB_TopBorder', 'ARTWORK')
-        AAB.MainMenuBarArtFrameBackground_TopBorder:SetTexture(texture.ID)
-        AAB.MainMenuBarArtFrameBackground_TopBorder:SetSize(barWidth, yOffset * 2)
-        AAB.MainMenuBarArtFrameBackground_TopBorder:SetTexCoord(0, 1, 0.025, 0.06)
-        AAB.MainMenuBarArtFrameBackground_TopBorder:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, barHeight + yOffset)
-        AAB.MainMenuBarArtFrameBackground_TopBorder:SetPoint('TOPRIGHT', MainMenuBarArtFrame, 'TOPRIGHT', 0, barHeight + yOffset)
-    else
-        AAB.MainMenuBarArtFrameBackground_TopBorder:SetTexture(texture.ID)
-    end
+AAB.MainMenuBarArtFrameBackground_TopBorder = MainMenuBarArtFrame:CreateTexture('$parent_ABB_TopBorder', 'ARTWORK')
+AAB.MainMenuBarArtFrameBackground_TopBorder:SetTexture(nil)
+AAB.MainMenuBarArtFrameBackground_TopBorder:SetSize(AAB_MAIN_MENU_BAR_WIDTH, AAB_STATUS_BAR_OFFSET * 2)
+AAB.MainMenuBarArtFrameBackground_TopBorder:SetTexCoord(0, 1, 0.025, 0.06)
+AAB.MainMenuBarArtFrameBackground_TopBorder:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, AAB_MAIN_MENU_BAR_HEIGHT + AAB_STATUS_BAR_OFFSET)
+AAB.MainMenuBarArtFrameBackground_TopBorder:SetPoint('TOPRIGHT', MainMenuBarArtFrame, 'TOPRIGHT', 0, AAB_MAIN_MENU_BAR_HEIGHT + AAB_STATUS_BAR_OFFSET)
+
+function AAB.UpdateTextures()
+
+    if AAB_SELECTED_THEME then
+
+        AAB_MAIN_MENU_BAR_HEIGHT = MainMenuBar:GetHeight()
+        AAB_MAIN_MENU_BAR_WIDTH = MainMenuBar:GetWidth()
+        AAB_STATUS_BAR_OFFSET = StatusTrackingBarManager:GetHeight()
+
+        -- set the left end texture
+        MainMenuBarArtFrame.LeftEndCap:SetTexture(AAB_SELECTED_THEME.ID)
+        MainMenuBarArtFrame.LeftEndCap:SetTexCoord(0, 0.32, 0.78, 1)
+
+        -- set the right end texture, here we flip the image using the 8 point coord system
+        MainMenuBarArtFrame.RightEndCap:SetTexture(AAB_SELECTED_THEME.ID)
+        MainMenuBarArtFrame.RightEndCap:SetTexCoord(0.32, 0.78, 0.32, 1, 0, 0.78, 0, 1)
+
+        -- set the background when no extra bars are displayed
+        MainMenuBarArtFrameBackground.BackgroundSmall:SetTexture(AAB_SELECTED_THEME.ID)
+        MainMenuBarArtFrameBackground.BackgroundSmall:SetTexCoord(0, 1, 0.17, 0.35)
+        MainMenuBarArtFrameBackground.BackgroundSmall:SetDrawLayer("BACKGROUND", -1)
+
+        -- set the background when extra bars are displayed
+        MainMenuBarArtFrameBackground.BackgroundLarge:SetTexture(AAB_SELECTED_THEME.ID)
+        MainMenuBarArtFrameBackground.BackgroundLarge:SetTexCoord(0, 1, 0.17, 0.35)
+        MainMenuBarArtFrameBackground.BackgroundLarge:SetDrawLayer("BACKGROUND", -1)
+
+        -- update extra border texture
+        AAB.MainMenuBarArtFrameBackground_TopBorder:SetTexture(AAB_SELECTED_THEME.ID)
     
-    for i = 1, 12 do
-        local button = _G['ActionButton'..i]
-        local parent, parentLevel, grandparent, grandparentLevel, buttonLevel = button:GetParent():GetName(), button:GetParent():GetFrameLevel(), button:GetParent():GetParent():GetName(), button:GetParent():GetParent():GetFrameLevel(), button:GetFrameLevel()
-        --print(parent, parentLevel, grandparent, grandparentLevel, buttonLevel)
-        
-        local point, relativeTo, relativePoint, xOfs, yOfs = button:GetPoint()
-        --print(point, relativeTo, relativePoint, xOfs, yOfs)
+        -- get action bar visiblities
+        if InterfaceOptionsActionBarsPanelBottomLeft:GetChecked() == true or InterfaceOptionsActionBarsPanelBottomRight:GetChecked() == true then
+            -- set textures to double height
+            MainMenuBarArtFrameBackground.BackgroundSmall:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, AAB_MAIN_MENU_BAR_HEIGHT)
+            MainMenuBarArtFrameBackground.BackgroundLarge:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, AAB_MAIN_MENU_BAR_HEIGHT)
 
-        --ActionButton1:ClearAllPoints()
-        --ActionButton1:SetPoint('CENTER', UIParent, 'CENTER', 0 , 0)
+            MainMenuBarArtFrame.LeftEndCap:SetPoint('TOPLEFT', MainMenuBarArtFrameBackground, 'TOPLEFT', -196, AAB_MAIN_MENU_BAR_HEIGHT + (AAB_STATUS_BAR_OFFSET * 3))
+            MainMenuBarArtFrame.LeftEndCap:SetPoint('TOPRIGHT', MainMenuBarArtFrameBackground, 'TOPLEFT', AAB_MAIN_MENU_BAR_HEIGHT, AAB_MAIN_MENU_BAR_HEIGHT + (AAB_STATUS_BAR_OFFSET * 3))
+
+            MainMenuBarArtFrame.RightEndCap:SetPoint('TOPRIGHT', MainMenuBarArtFrameBackground, 'TOPRIGHT', 196, AAB_MAIN_MENU_BAR_HEIGHT + (AAB_STATUS_BAR_OFFSET * 3))
+            MainMenuBarArtFrame.RightEndCap:SetPoint('TOPLEFT', MainMenuBarArtFrameBackground, 'TOPRIGHT', AAB_MAIN_MENU_BAR_HEIGHT * -1, AAB_MAIN_MENU_BAR_HEIGHT + (AAB_STATUS_BAR_OFFSET * 3))
+
+            AAB.MainMenuBarArtFrameBackground_TopBorder:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, AAB_MAIN_MENU_BAR_HEIGHT + AAB_STATUS_BAR_OFFSET)
+            AAB.MainMenuBarArtFrameBackground_TopBorder:SetPoint('TOPRIGHT', MainMenuBarArtFrame, 'TOPRIGHT', 0, AAB_MAIN_MENU_BAR_HEIGHT + AAB_STATUS_BAR_OFFSET)
+        else
+            -- set to single height
+            MainMenuBarArtFrameBackground.BackgroundSmall:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, 0)
+            MainMenuBarArtFrameBackground.BackgroundSmall:SetFrameLevel(-1)
+
+            MainMenuBarArtFrameBackground.BackgroundLarge:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, 0)
+            MainMenuBarArtFrameBackground.BackgroundLarge:SetFrameLevel(-1)
+
+            local scaler = (MainMenuBarArtFrame.LeftEndCap:GetHeight() + AAB_STATUS_BAR_OFFSET) / MainMenuBarArtFrame.LeftEndCap:GetHeight()
+            MainMenuBarArtFrame.LeftEndCap:SetWidth(MainMenuBarArtFrame.LeftEndCap:GetWidth() * scaler)
+
+            MainMenuBarArtFrame.LeftEndCap:SetPoint('TOPLEFT', MainMenuBarArtFrameBackground, 'TOPLEFT', -98 * scaler, AAB_STATUS_BAR_OFFSET * 2.5)
+            MainMenuBarArtFrame.LeftEndCap:SetPoint('TOPRIGHT', MainMenuBarArtFrameBackground, 'TOPLEFT', (AAB_MAIN_MENU_BAR_HEIGHT / 2), AAB_STATUS_BAR_OFFSET * 2.5)
+
+            MainMenuBarArtFrame.RightEndCap:SetPoint('TOPRIGHT', MainMenuBarArtFrameBackground, 'TOPRIGHT', 98 * scaler, AAB_STATUS_BAR_OFFSET * 2.5)
+            MainMenuBarArtFrame.RightEndCap:SetPoint('TOPLEFT', MainMenuBarArtFrameBackground, 'TOPRIGHT', ((AAB_MAIN_MENU_BAR_HEIGHT / 2) * -1), AAB_STATUS_BAR_OFFSET * 2.5)
+
+            AAB.MainMenuBarArtFrameBackground_TopBorder:SetPoint('TOPLEFT', MainMenuBarArtFrame, 'TOPLEFT', 0, AAB_STATUS_BAR_OFFSET)
+            AAB.MainMenuBarArtFrameBackground_TopBorder:SetPoint('TOPRIGHT', MainMenuBarArtFrame, 'TOPRIGHT', 0, AAB_STATUS_BAR_OFFSET)
+        end
+
+        
+        for i = 1, 12 do
+            local button = _G['ActionButton'..i]
+
+
+
+
+            local buttonBorder = _G['ActionButton'..i..'Border']
+            buttonBorder:SetTexture(AAB_SELECTED_THEME.ID)
+            buttonBorder:SetTexCoord(0.38, 0.48, 0.63, 0.73)
+
+            -- local buttonBorder = _G['ActionButton'..i..'NormalTexture']
+            -- buttonBorder:SetTexture(AAB_SELECTED_THEME.ID)
+            -- buttonBorder:SetTexCoord(0.38, 0.48, 0.63, 0.73)
+
+            -- local buttonBorder = _G['ActionButton'..i..'FlyoutBorder']
+            -- buttonBorder:SetTexture(AAB_SELECTED_THEME.ID)
+            -- buttonBorder:SetTexCoord(0.38, 0.48, 0.63, 0.73)
+
+            -- local buttonBorder = _G['ActionButton'..i..'Border']
+            -- buttonBorder:SetTexture(AAB_SELECTED_THEME.ID)
+            -- buttonBorder:SetTexCoord(0.38, 0.48, 0.63, 0.73)
+
+            -- local buttonBorder = _G['ActionButton'..i..'Border']
+            -- buttonBorder:SetTexture(AAB_SELECTED_THEME.ID)
+            -- buttonBorder:SetTexCoord(0.38, 0.48, 0.63, 0.73)
+
+
+
+
+
+
+            --local parent, parentLevel, grandparent, grandparentLevel, buttonLevel = button:GetParent():GetName(), button:GetParent():GetFrameLevel(), button:GetParent():GetParent():GetName(), button:GetParent():GetParent():GetFrameLevel(), button:GetFrameLevel()
+            --print(parent, parentLevel, grandparent, grandparentLevel, buttonLevel)
+            
+            --local point, relativeTo, relativePoint, xOfs, yOfs = button:GetPoint()
+            --print(point, relativeTo, relativePoint, xOfs, yOfs)
+
+            --ActionButton1:ClearAllPoints()
+            --ActionButton1:SetPoint('CENTER', UIParent, 'CENTER', 0 , 0)
+        end
+
+        local numButtons = 12;
+        for i=1, numButtons do
+            local button = _G["ActionButton"..i];
+
+            button:SetFrameLevel(5)
+            button:SetFrameStrata('HIGH')
+
+
+            --button:SetSize(30, 30);
+            
+            local hotkey = _G[button:GetName().."HotKey"];
+            --hotkey:SetSize(30, 14);
+            
+            local name = _G[button:GetName().."Name"];
+            --name:SetSize(30, 14);
+        
+            -- local texture = MainMenuBarArtFrame:CreateTexture(button:GetName().."Texture");
+            -- texture:SetTexture("Interface\\Buttons\\UI-Quickslot");
+            -- texture:SetDrawLayer("BACKGROUND", -1);
+            -- texture:SetSize(60, 60);
+            -- texture:SetPoint("CENTER", button);
+            --button:GetNormalTexture():SetAlpha(0);
+            
+            if (  i == 1 ) then
+                --button:ClearAllPoints();
+                --button:SetPoint("BOTTOMLEFT", MainMenuBarArtFrame, "BOTTOMLEFT", 0, 0);
+            else
+                --button:ClearAllPoints();
+                --button:SetPoint("LEFT", _G["ActionButton"..(i-1)], "RIGHT", 8, 0);
+            end
+        end
+
     end
 
 end
+
+InterfaceOptionsActionBarsPanelBottomLeft:HookScript('OnClick', AAB.UpdateTextures)
+InterfaceOptionsActionBarsPanelBottomRight:HookScript('OnClick', AAB.UpdateTextures)
+InterfaceOptionsActionBarsPanelRight:HookScript('OnClick', AAB.UpdateTextures)
+InterfaceOptionsActionBarsPanelRightTwo:HookScript('OnClick', AAB.UpdateTextures)
+InterfaceOptionsActionBarsPanelStackRightBars:HookScript('OnClick', AAB.UpdateTextures)
+InterfaceOptionsActionBarsPanelLockActionBars:HookScript('OnClick', AAB.UpdateTextures)
+InterfaceOptionsActionBarsPanelAlwaysShowActionBars:HookScript('OnClick', AAB.UpdateTextures)
+InterfaceOptionsActionBarsPanelCountdownCooldowns:HookScript('OnClick', AAB.UpdateTextures)
 
 AAB.ThemeSelectionDropDownHeader = InterfaceOptionsActionBarsPanel:CreateFontString('$parent_AAB_ThemeSelectionHeader', 'OVERLAY', 'GameFontNormal')
 AAB.ThemeSelectionDropDownHeader:SetPoint('TOPLEFT', InterfaceOptionsActionBarsPanelCountdownCooldowns, 'BOTTOMLEFT', 16, -8)
 AAB.ThemeSelectionDropDownHeader:SetText('Themes')
 
 AAB.ThemeSelectionDropDown = CreateFrame('FRAME', 'ABB_ThemeSelectionDropdown', InterfaceOptionsActionBarsPanel, "UIDropDownMenuTemplate")
-AAB.ThemeSelectionDropDown:SetPoint('TOPLEFT', AAB.ThemeSelectionDropDownHeader, 'BOTTOMLEFT', 0, -8)
+AAB.ThemeSelectionDropDown:SetPoint('TOPLEFT', AAB.ThemeSelectionDropDownHeader, 'BOTTOMLEFT', -16, -8)
 UIDropDownMenu_SetWidth(AAB.ThemeSelectionDropDown, 100)
 UIDropDownMenu_SetText(AAB.ThemeSelectionDropDown, 'Select theme')
 UIDropDownMenu_Initialize(AAB.ThemeSelectionDropDown, function()
@@ -80,11 +190,94 @@ UIDropDownMenu_Initialize(AAB.ThemeSelectionDropDown, function()
         info.text = k
         info.isTitle = false
         info.func = function()
-            AAB.UpdateTextures(v)
+            AAB_SELECTED_THEME = v
+            AAB.UpdateTextures()
+            UIDropDownMenu_SetText(AAB.ThemeSelectionDropDown, k)
         end
         UIDropDownMenu_AddButton(info)
     end
 end)
+
+
+
+AAB.Events = {
+    ['ACTIONBAR_SLOT_CHANGED'] = function()
+        AAB.UpdateTextures()
+    end,
+    ['ACTIONBAR_PAGE_CHANGED'] = function()
+        AAB.UpdateTextures()
+    end,
+    ['UI_SCALE_CHANGED'] = function()
+        AAB.UpdateTextures()
+    end,
+}
+
+
+
+AAB.EventFrame = CreateFrame('FRAME', 'AAB_EventFrame', UIParent)
+AAB.EventFrame:RegisterEvent('ACTIONBAR_SLOT_CHANGED')
+AAB.EventFrame:RegisterEvent('ACTIONBAR_PAGE_CHANGED')
+AAB.EventFrame:RegisterEvent('UI_SCALE_CHANGED')
+AAB.EventFrame:SetScript('OnEvent', function(self, event, ...)
+    AAB.Events[event]()
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 -- --options interface
 -- AAB.OptionsPanel = CreateFrame("Frame", "AAB_OptionsPanel", UIParent);
